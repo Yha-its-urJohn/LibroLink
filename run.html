@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LibroLink (Java)</title>
+<script src="https://cjrtnc.leaningtech.com/4.3/loader.js"></script>
+<style>
+  html, body { margin: 0; height: 100%; background: #0a0e14; }
+  #display { width: 100%; height: 100%; }
+</style>
+</head>
+<body>
+<div id="display"></div>
+<script>
+(async function () {
+  await cheerpjInit({ version: 17 });
+  cheerpjCreateDisplay(-1, -1, document.getElementById("display"));
+  // works for any GitHub Pages address, e.g. /LibroLink/run.html -> /app/LibroLink/LibroLink.jar
+  const base = location.pathname.replace(/[^/]*$/, "");
+  await cheerpjRunMain("library.Main", "/app" + base + "LibroLink.jar");
+})();
+</script>
+</body>
+</html>

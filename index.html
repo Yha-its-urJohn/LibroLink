@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>LibroLink - Preview</title>
+<style>
+:root{--bg:#f0f2f5;--card:#fff;--ink:#1c1e21;--mute:#606770;--line:#ced0d4;--blue:#1877f2;--green:#42b72a;--red:#dc3545;--hi:#e7f3ff;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#18191a;--card:#242526;--ink:#e4e6eb;--mute:#b0b3b8;--line:#3e4042;--hi:#263951}}
+:root[data-theme="dark"]{--bg:#18191a;--card:#242526;--ink:#e4e6eb;--mute:#b0b3b8;--line:#3e4042;--hi:#263951}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.4 "Segoe UI",system-ui,-apple-system,sans-serif;min-height:100vh}
+input,select{font:inherit;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:6px;padding:10px 12px;width:100%}
+input:focus-visible,button:focus-visible,select:focus-visible{outline:2px solid var(--blue);outline-offset:1px}
+.btn{font:inherit;font-weight:600;border:0;border-radius:6px;padding:10px 16px;color:#fff;cursor:pointer;background:var(--mute)}
+.btn.blue{background:var(--blue)}.btn.green{background:var(--green)}.btn.red{background:var(--red)}.btn.white{background:#fff;color:var(--blue)}.btn.sm{padding:5px 10px}
+.msg:not(.good):not(.bad){color:#e1e4ff}
+main h3{margin:8px 0 0;color:#e1e4ff;font-size:16px}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.login{max-width:980px;margin:0 auto;min-height:100vh;display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:center;padding:24px}
+.brand h1{margin:0 0 8px;font-size:56px;color:#fff;letter-spacing:-1px;text-shadow:0 0 28px var(--glow,#a98bff)}
+#fx{position:fixed;inset:0;width:100%;height:100%;z-index:-1}
+.brand p{margin:0;font-size:24px;max-width:22ch;line-height:1.25;color:#e1e4ff}
+.card{background:var(--card);border-radius:8px;padding:24px;display:grid;gap:12px;box-shadow:0 2px 4px #0000001a,0 8px 16px #0000001a}
+.card label{display:grid;gap:4px;font-weight:600;color:var(--mute);font-size:13px}
+.card hr{border:0;border-top:1px solid var(--line);margin:4px 0;width:100%}
+.card small{text-align:center;color:var(--mute)}
+.seg{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.seg button{font:inherit;font-weight:600;border:0;border-radius:6px;padding:10px;background:var(--line);color:var(--ink);cursor:pointer}
+.seg button.on{background:var(--blue);color:#fff}
+.msg{min-height:1.2em;font-size:13px;margin:0}.bad{color:var(--red)}.good{color:var(--green)}
+.bar{background:var(--blue);color:#fff;display:flex;justify-content:space-between;align-items:center;padding:12px 20px;font-size:22px;gap:12px}
+.bar span{font-size:15px;display:flex;align-items:center;gap:12px}
+nav{display:flex;gap:4px;padding:8px 16px 0;border-bottom:1px solid var(--line);background:var(--card);overflow-x:auto}
+nav button{font:inherit;font-weight:600;background:none;border:0;border-bottom:3px solid transparent;padding:10px 16px;color:var(--mute);cursor:pointer;white-space:nowrap}
+nav button.on{color:var(--blue);border-color:var(--blue)}
+main{max-width:1000px;margin:0 auto;padding:16px;display:grid;gap:12px}
+.tool{display:flex;gap:8px;flex-wrap:wrap}.tool input{flex:1;min-width:110px;width:auto}.tool select{width:auto}
+.tw{overflow-x:auto;background:var(--card);border:1px solid var(--line);border-radius:6px}
+table{border-collapse:collapse;width:100%}
+th,td{text-align:left;padding:8px 12px;border-bottom:1px solid var(--line);white-space:nowrap}
+tbody tr:hover,tr.sel{background:var(--hi)}
+.pill{font-size:13px;font-weight:600;padding:2px 8px;border-radius:99px;border:1px solid currentColor}
+pre{margin:0;background:var(--card);border:1px solid var(--line);border-radius:6px;padding:16px;font-size:16px;overflow-x:auto}
+td input{width:80px;padding:5px 8px}
+@media(max-width:720px){.login{grid-template-columns:1fr;gap:16px;align-content:center}.brand h1{font-size:40px}.brand p{font-size:18px}}
+</style>
+</head>
+<body>
+<canvas id="fx" aria-hidden="true"></canvas>
+<div id="app"></div>
+<script>
+const RULE={Book:[7,20,10],Magazine:[3,10,5]};
+const items=[
+ {id:'B1',type:'Book',title:'Java Basics',d:'by J. Cruz',p:250,ok:1},
+ {id:'B2',type:'Book',title:'Data Structures',d:'by M. Reyes',p:320,ok:1},
+ {id:'B3',type:'Book',title:'Noli Me Tangere',d:'by J. Rizal',p:180,ok:1},
+ {id:'M1',type:'Magazine',title:'Tech Monthly',d:'Issue Oct 2026',p:120,ok:1},
+ {id:'M2',type:'Magazine',title:'Science Today',d:'Issue Sep 2026',p:95,ok:1}];
+const users=[{u:'admin',p:'admin123',n:'Library Admin',r:'Admin',b:[]},{u:'jochel',p:'1234',n:'Jochel',r:'Member',b:[]},{u:'henry',p:'1234',n:'Henry',r:'Member',b:[]},{u:'laurice',p:'1234',n:'Laurice',r:'Member',b:[]}];
+const fines=[];
+const sum=fn=>fines.filter(fn).reduce((t,f)=>t+f.amt,0);
+const pay=(m,item,type,amt,method)=>fines.push({m,item,type,amt,paid:1,method,time:new Date().toLocaleString()});
+let me=null,tab='',note='',bad=false,role='Member',signup=false,q='',draft={type:'Book',id:'',title:'',extra:'',price:''};
+const app=document.getElementById('app');
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const say=(m,b)=>{note=m;bad=!!b;draw()};
+const v=id=>document.getElementById(id).value.trim();
+const hit=i=>(i.title+' '+i.d).toLowerCase().includes(q.trim().toLowerCase());
+
+function draw(){app.innerHTML=me?dash():loginView()}
+function loginView(){return `<div class="login"><div class="brand"><h1>LibroLink</h1><p>Borrow, return and manage books with the people who love reading.</p></div>
+<div class="card"><div class="seg"><button class="${role=='Member'?'on':''}" onclick="setRole('Member')">Member</button><button class="${role=='Admin'?'on':''}" onclick="setRole('Admin')">Admin</button></div>
+${signup?'<label>Full name<input id="fn"></label>':''}
+<label>Username<input id="un" autocomplete="off"></label><label>Password<input id="pw" type="password"></label>
+<button class="btn blue" onclick="${signup?'doSignup()':'doLogin()'}">${signup?'Sign up':'Log In'}</button>
+<p class="msg ${bad?'bad':'good'}">${esc(note)}</p><hr>
+<button class="btn green" onclick="signup=!signup;note='';draw()">${signup?'Back to log in':'Create new account'}</button>
+</div></div>`}
+function doLogin(){const u=users.find(x=>x.u.toLowerCase()==v('un').toLowerCase()&&x.p==document.getElementById('pw').value&&x.r==role);
+ if(!u)return say('Wrong username, password, or account type.',1);me=u;tab=u.r=='Admin'?'Books':'Browse books';q='';note='';draw()}
+function doSignup(){const n=v('fn'),u=v('un'),p=document.getElementById('pw').value;
+ if(!n||!u||!p)return say('Please fill in every field.',1);
+ if(users.some(x=>x.u.toLowerCase()==u.toLowerCase()))return say('That username is taken.',1);
+ users.push({u,p,n,r:'Member',b:[]});signup=false;role='Member';say('Account created. You can log in now.')}
+function logout(){me=null;note='';q='';draw()}
+function setRole(r){role=r;note='';draw()}
+function go(t){tab=t;note='';q='';draw()}
+
+function dash(){const A=me.r=='Admin',tabs=A?['Books','Users','Payments','Report']:['Browse books','My Activity'];
+ return `<div class="bar"><b>LibroLink${A?' Admin':''}</b><span>${A?'':'Hi, '}${esc(me.n)}<button class="btn white" onclick="logout()">Log out</button></span></div>
+<nav>${tabs.map(t=>`<button class="${t==tab?'on':''}" onclick="go('${t}')">${t}</button>`).join('')}</nav>
+<main>${note?`<p class="msg ${bad?'bad':'good'}">${esc(note)}</p>`:''}${view()}</main>`}
+
+function itemTable(list,extra){return `<div class="tw"><table><tr><th>ID</th><th>Type</th><th>Title</th><th>Details</th><th>Price</th><th>Status</th><th></th></tr>${
+ list.map(i=>{const x=items.indexOf(i);return `<tr onclick="pick(${x})"><td>${esc(i.id)}</td><td>${i.type}</td><td>${esc(i.title)}</td><td>${esc(i.d)}</td><td>${i.p.toFixed(2)}</td><td><span class="pill ${i.ok?'good':'bad'}">${i.ok?'Available':'Borrowed'}</span></td><td>${extra(x,i)}</td></tr>`}).join('')||'<tr><td colspan="7">No items found.</td></tr>'}</table></div>`}
+const searchBar=`<div class="tool"><input placeholder="Search title or author" value="${'${esc(q)}'}"></div>`;
+function sb(){return `<div class="tool"><input placeholder="Search title or author" value="${esc(q)}" oninput="q=this.value" onkeydown="if(event.key=='Enter')draw()"><button class="btn blue" onclick="draw()">Search</button></div>`}
+function view(){
+ if(tab=='My Activity')return '<h3>Borrowed items</h3>'+loansView()+'<h3>Payments</h3>'+payView();
+ if(tab=='Payments')return `<div class="tw"><table><tr><th>Member</th><th>Item</th><th>Type</th><th>Amount (PHP)</th><th>Status</th><th>Paid via</th><th>Date</th><th></th></tr>${fines.map((f,x)=>`<tr><td>${esc(f.m.n)}</td><td>${esc(f.item)}</td><td>${f.type}</td><td>${f.amt.toFixed(2)}</td><td><span class="pill ${f.paid?'good':'bad'}">${f.paid?'Paid':'Unpaid'}</span></td><td>${f.method}</td><td>${f.time}</td><td>${f.paid?'':`<button class="btn green sm" onclick="payFine(${x},'Cash (counter)')">Mark as paid (cash)</button>`}</td></tr>`).join('')||'<tr><td colspan="8">No payments yet.</td></tr>'}</table></div>`;
+ function payView(){const mine=fines.filter(f=>f.m===me),due=mine.filter(f=>!f.paid).reduce((s,f)=>s+f.amt,0);
+  return `<div class="tool"><select id="pm"><option>Cash</option><option>GCash</option><option>Maya</option></select><span class="msg" style="align-self:center">Only late fines need paying here (rentals and purchases are paid right away). Unpaid: PHP ${due.toFixed(2)}</span></div><div class="tw"><table><tr><th>Item</th><th>Type</th><th>Amount (PHP)</th><th>Status</th><th>Paid via</th><th>Date</th><th></th></tr>${mine.map(f=>`<tr><td>${esc(f.item)}</td><td>${f.type}</td><td>${f.amt.toFixed(2)}</td><td><span class="pill ${f.paid?'good':'bad'}">${f.paid?'Paid':'Unpaid'}</span></td><td>${f.method}</td><td>${f.time}</td><td>${f.paid?'':`<button class="btn green sm" onclick="payFine(${fines.indexOf(f)},document.getElementById('pm').value)">Pay</button>`}</td></tr>`).join('')||'<tr><td colspan="7">No payments yet. Rentals, purchases and late fines show here.</td></tr>'}</table></div>`}
+ if(tab=='Books')return sb()+`<div class="tool"><select onchange="draft.type=this.value"><option ${draft.type=='Book'?'selected':''}>Book</option><option ${draft.type=='Magazine'?'selected':''}>Magazine</option></select>
+ <input placeholder="ID" value="${esc(draft.id)}" oninput="draft.id=this.value"><input placeholder="Title" value="${esc(draft.title)}" oninput="draft.title=this.value"><input placeholder="Author / Issue" value="${esc(draft.extra)}" oninput="draft.extra=this.value"><input type="number" min="0" placeholder="Price" value="${esc(draft.price)}" oninput="draft.price=this.value">
+ <button class="btn green" onclick="addItem()">Add</button><button class="btn blue" onclick="updItem()">Update title</button></div>`+
+ itemTable(items.filter(hit),(x)=>`<button class="btn red sm" onclick="event.stopPropagation();delItem(${x})">Delete</button>`);
+ if(tab=='Users')return `<div class="tool"><input id="nn" placeholder="Full name"><input id="nu" placeholder="Username"><input id="np" type="password" placeholder="Password"><button class="btn green" onclick="addMember()">Add member</button></div><div class="tw"><table><tr><th>Username</th><th>Name</th><th>Role</th><th>Borrowed</th><th></th></tr>${users.map((u,x)=>`<tr><td>${esc(u.u)}</td><td>${esc(u.n)}</td><td>${u.r}</td><td>${u.r=='Member'?u.b.length:'-'}</td><td>${u.r=='Member'?`<button class="btn red sm" onclick="delUser(${x})">Delete</button>`:''}</td></tr>`).join('')}</table></div>`;
+ if(tab=='Report'){const b=items.filter(i=>!i.ok).length,t=items.length;return `<pre>LIBROLINK REPORT\n----------------\nTotal items     : ${t}\nAvailable       : ${t-b}\nBorrowed        : ${b}\nMembers         : ${users.filter(u=>u.r=='Member').length}\nRental income   : PHP ${sum(f=>f.paid&&f.type=='Rental').toFixed(2)}\nBook sales      : PHP ${sum(f=>f.paid&&f.type=='Purchase').toFixed(2)}\nLate fines paid : PHP ${sum(f=>f.paid&&f.type=='Late fine').toFixed(2)}\nUnpaid fines    : PHP ${sum(f=>!f.paid).toFixed(2)}\nTOTAL INCOME    : PHP ${sum(f=>f.paid).toFixed(2)}</pre>`}
+ if(tab=='Browse books')return sb()+`<div class="tool"><label>Days <input id="dy" type="number" min="1" value="1" style="width:80px"></label><select id="pm"><option>Cash</option><option>GCash</option><option>Maya</option></select><span class="msg" style="align-self:center">Rent: Books PHP 10/day (max 7 days), Magazines PHP 5/day (max 3). Buy = pay the price and keep it.</span></div>`+itemTable(items.filter(hit),(x,i)=>`<button class="btn green sm" ${i.ok?'':'disabled'} onclick="event.stopPropagation();borrow(${x})">Borrow</button> <button class="btn blue sm" ${i.ok?'':'disabled'} onclick="event.stopPropagation();buy(${x})">Buy</button>`);
+ function loansView(){return `<div class="tw"><table><tr><th>ID</th><th>Title</th><th>Type</th><th>Days borrowed</th><th>Days kept</th><th></th></tr>${me.b.map(i=>{const x=items.indexOf(i);return `<tr><td>${esc(i.id)}</td><td>${esc(i.title)}</td><td>${i.type}</td><td>${i.days}</td><td><input id="k${x}" type="number" min="0" value="1"></td><td><button class="btn blue sm" onclick="giveBack(${x})">Return</button></td></tr>`}).join('')||'<tr><td colspan="6">You have no loans yet. Borrow something from Browse books.</td></tr>'}</table></div>
+ <p class="msg">Late fine per extra day: Books PHP 20, Magazines PHP 10. Limit: 3 items.</p>`}}
+
+function addMember(){const n=v('nn'),u=v('nu'),p=document.getElementById('np').value;
+ if(!n||!u||!p)return say('Please fill in every field.',1);
+ if(users.some(x=>x.u.toLowerCase()==u.toLowerCase()))return say('That username is taken.',1);
+ users.push({u,p,n,r:'Member',b:[]});say('Member added.')}
+function payFine(x,method){const f=fines[x];if(f.paid)return say('That fine is already paid.',1);
+ f.paid=1;f.method=method;f.time=new Date().toLocaleString();say('Payment received: PHP '+f.amt.toFixed(2)+' via '+method+'.')}
+function pick(x){if(tab!='Books')return;const i=items[x];draft.id=i.id;draft.title=i.title;draw()}
+function addItem(){const{type,id,title,extra,price}=draft;
+ if(!id.trim()||!title.trim()||!extra.trim()||isNaN(parseFloat(price)))return say('Fill in ID, title, author/issue and price.',1);
+ if(items.some(i=>i.id.toLowerCase()==id.trim().toLowerCase()))return say('That ID already exists.',1);
+ items.push({id:id.trim(),p:parseFloat(price),type,title:title.trim(),d:(type=='Book'?'by ':'Issue ')+extra.trim(),ok:1});draft={type,id:'',title:'',extra:'',price:''};say('Item added.')}
+function updItem(){const i=items.find(i=>i.id.toLowerCase()==draft.id.trim().toLowerCase());
+ if(!i)return say('Type an ID or click a row first.',1);if(!draft.title.trim())return say('Type a new title.',1);i.title=draft.title.trim();say('Title updated.')}
+function delItem(x){if(!items[x].ok)return say('A borrowed item cannot be deleted.',1);items.splice(x,1);say('Item deleted.')}
+function delUser(x){const u=users[x];if(u.b.length)return say('Only members with no borrowed items can be deleted.',1);users.splice(x,1);say('Member deleted.')}
+function borrow(x){const i=items[x],d=parseInt(document.getElementById('dy').value,10),m=document.getElementById('pm').value,R=RULE[i.type];
+ if(!i.ok)return say('That item is already borrowed.',1);
+ if(me.b.length>=3)return say('You reached the limit of 3 items.',1);
+ if(isNaN(d)||d<1||d>R[0])return say('You can borrow this for 1 to '+R[0]+' days.',1);
+ const c=d*R[2];i.ok=0;i.days=d;me.b.push(i);pay(me,i.title,'Rental',c,m);
+ say('Borrowed "'+i.title+'" for '+d+' day(s). Paid PHP '+c.toFixed(2)+' via '+m+'.')}
+function buy(x){const i=items[x],m=document.getElementById('pm').value;
+ if(!i.ok)return say("That item is currently borrowed and can't be sold.",1);
+ items.splice(x,1);pay(me,i.title,'Purchase',i.p,m);say('You bought "'+i.title+'" for PHP '+i.p.toFixed(2)+' via '+m+'.')}
+function giveBack(x){const i=items[x],d=parseInt(document.getElementById('k'+x).value,10);
+ if(isNaN(d)||d<0)return say('Please enter a number.',1);
+ const f=Math.max(0,d-i.days)*RULE[i.type][1];i.ok=1;me.b.splice(me.b.indexOf(i),1);if(f>0)fines.push({m:me,item:i.title,type:'Late fine',amt:f,paid:0,method:'-',time:'-'});say('Returned "'+i.title+'". '+(f>0?'Fine: PHP '+f.toFixed(2)+' (pay it in My Activity).':'No fine.'))}
+document.addEventListener('keydown',e=>{if(e.key=='Enter'&&!me&&e.target.tagName=='INPUT')document.querySelector('.btn.blue').click()});
+const fx=document.getElementById('fx'),cx=fx.getContext('2d'),still=matchMedia('(prefers-reduced-motion: reduce)').matches;
+let W,H,t=0,mix=0,target=0,n=0;
+const P=Array.from({length:70},()=>({x:Math.random(),y:Math.random(),r:2+Math.random()*5,v:.0008+Math.random()*.0025}));
+const lerp=(a,b)=>a.map((v,i)=>Math.round(v+(b[i]-v)*mix)).join(',');
+function size(){W=fx.width=innerWidth;H=fx.height=innerHeight}
+addEventListener('resize',size);size();
+const PT=Array.from({length:34},()=>({x:Math.random(),y:Math.random(),s:6+Math.random()*7,v:.0006+Math.random()*.0012,r:Math.random()*6,w:Math.random()*6}));
+const EM=Array.from({length:40},()=>({x:Math.random(),y:Math.random(),r:1+Math.random()*2.5,v:.0008+Math.random()*.002}));
+let dn=0;
+function demon(){
+ if(!still)dn++;
+ const g=cx.createLinearGradient(0,0,0,H);g.addColorStop(0,'#0a0e14');g.addColorStop(1,'#14282a');cx.fillStyle=g;cx.fillRect(0,0,W,H);
+ const s=56,o=(dn*.3)%(2*s);cx.fillStyle='rgba(40,90,70,.11)';
+ for(let gx=-2*s;gx<W+2*s;gx+=s)for(let gy=-2*s;gy<H+2*s;gy+=s)if(((gx/s+gy/s)%2+2)%2==0)cx.fillRect(gx+o,gy+o,s,s);
+ for(const e of EM){if(!still){e.y-=e.v;if(e.y<-.05){e.y=1.05;e.x=Math.random()}}
+  cx.fillStyle=`rgba(255,150,60,${Math.max(0,Math.min(1,e.y))*.85})`;cx.beginPath();cx.arc(e.x*W,e.y*H,e.r,0,7);cx.fill()}
+ for(const p of PT){if(!still){p.y+=p.v;p.x+=Math.sin(dn*.03+p.w)*.0007;p.r+=.03;if(p.y>1.05){p.y=-.05;p.x=Math.random()}}
+  cx.save();cx.translate(p.x*W,p.y*H);cx.rotate(p.r);cx.fillStyle='rgba(255,183,197,.8)';cx.beginPath();cx.ellipse(0,0,p.s/2,p.s/4,0,0,7);cx.fill();cx.restore()}
+ const m=dn%720;
+ if(m<80){const t=m/80,x0=-.3*W+1.6*W*t;cx.strokeStyle=`rgba(190,240,255,${(1-t)*.8})`;cx.lineWidth=3;cx.beginPath();cx.moveTo(x0,0);cx.lineTo(x0-H*.6,H);cx.stroke()}
+}
+function frame(){
+ if(!me){
+  if(!still){t+=.03;n++;if(n%600==0)target=1-target;mix+=Math.sign(target-mix)*Math.min(.005,Math.abs(target-mix))}
+  const g=cx.createLinearGradient(0,0,0,H);
+  g.addColorStop(0,`rgb(${lerp([8,10,32],[30,6,8])})`);g.addColorStop(1,`rgb(${lerp([58,18,110],[120,20,10])})`);
+  cx.fillStyle=g;cx.fillRect(0,0,W,H);
+  const c=lerp([140,90,255],[255,90,30]),k=.55+.25*Math.sin(t),gl=cx.createRadialGradient(W/2,H*1.05,0,W/2,H*1.05,W*.6);
+  gl.addColorStop(0,`rgba(${c},${.43*k})`);gl.addColorStop(1,`rgba(${c},0)`);
+  cx.fillStyle=gl;cx.fillRect(0,0,W,H);
+  document.documentElement.style.setProperty('--glow',`rgb(${c})`);
+  const pc=lerp([170,140,255],[255,150,60]);
+  for(const p of P){
+   if(!still){p.y-=p.v*(1+.6*mix);p.x+=Math.sin(t+p.r)*.0006;if(p.y<-.05){p.y=1.05;p.x=Math.random()}}
+   const a=Math.max(0,Math.min(1,p.y)),X=p.x*W,Y=p.y*H;
+   cx.fillStyle=`rgba(${pc},${a*.18})`;cx.beginPath();cx.arc(X,Y,p.r*2.2,0,7);cx.fill();
+   cx.fillStyle=`rgba(${pc},${a*.9})`;cx.beginPath();cx.arc(X,Y,p.r*.6,0,7);cx.fill();
+  }
+ }else demon();
+ requestAnimationFrame(frame)
+}
+frame();
+draw();
+</script>
+</body>
+</html>
